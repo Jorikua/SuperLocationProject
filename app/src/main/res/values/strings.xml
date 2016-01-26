@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">SuperLocationProject</string>
+    <string name="google_map_api_key">AIzaSyCfUh2rQFTYTg7n5LAk2Ff4oJWI4RNEYio</string>
+    <string name="direction_api_key">AIzaSyBOXpoW43-NK0209WYRGpNvAz79ub2Emds</string>
+
+    <!--LocationHelper-->
+    <string name="error_location_disconnected">Disconnected. Please re-connect.</string>
+    <string name="error_location_network_lost">Network lost. Please re-connect.</string>
+    <string name="error_services_not_available">Sorry. Location services not available to you</string>
+
+</resources>
