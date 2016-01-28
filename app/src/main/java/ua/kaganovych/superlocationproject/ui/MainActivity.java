@@ -1,19 +1,23 @@
 package ua.kaganovych.superlocationproject.ui;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -44,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private Marker myMarker;
     private Polyline polyline;
     private int lastType;
+    private static final int POLYLINE_WIDTH = 15;
+    private static final int REQUEST_CODE_LOCATION_PERMISSION = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +71,33 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        locationHelper.connectClient();
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            locationHelper.connectClient();
+            return;
+        }
+        final int hasLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (hasLocationPermission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_LOCATION_PERMISSION);
+        } else {
+            locationHelper.connectClient();
+        }
+
+    }
+
+    @SuppressWarnings("all")
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_LOCATION_PERMISSION: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    locationHelper.connectClient();
+                }
+                if (grantResults.length > 0 &&grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                    final NoPermissionDialog noPermissionDialog = new NoPermissionDialog();
+                    noPermissionDialog.show(getFragmentManager(), "NoPermissionDialog");
+                }
+            }
+        }
     }
 
     @Override
@@ -76,10 +108,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(updateLocationReceiver);
-        locationHelper.stopLocationUpdates();
-        locationHelper.removeActivityUpdates();
         super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(updateLocationReceiver);
+        if (locationHelper.getGoogleApiClient().isConnected()) {
+            locationHelper.stopLocationUpdates();
+            locationHelper.removeActivityUpdates();
+        }
     }
 
     @Override
@@ -98,9 +132,7 @@ public class MainActivity extends AppCompatActivity {
                         if (lastType == DetectedActivity.STILL) return;
                             lastType = DetectedActivity.STILL;
                             locationHelper.stopLocationUpdates();
-                            locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY,
-                                    10000,
-                                    7000);
+                            locationHelper.createLocationRequestAndStart(DateUtils.MINUTE_IN_MILLIS, DateUtils.MINUTE_IN_MILLIS - 5000);
                             Log.d("TAG", "STILL");
                             Toast.makeText(getBaseContext(), "STILL " +
                                     locationHelper.getRequest().getInterval() + " " +
@@ -113,9 +145,7 @@ public class MainActivity extends AppCompatActivity {
                         if (lastType == DetectedActivity.WALKING) return;
                         lastType = DetectedActivity.WALKING;
                         locationHelper.stopLocationUpdates();
-                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY,
-                                7000,
-                                5000);
+                        locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
                         Log.d("TAG", "WALKING");
                         Toast.makeText(getBaseContext(), "WALKING " +
                                 locationHelper.getRequest().getInterval() + " " +
@@ -127,9 +157,7 @@ public class MainActivity extends AppCompatActivity {
                         if (lastType == DetectedActivity.ON_FOOT) return;
                         lastType = DetectedActivity.ON_FOOT;
                         locationHelper.stopLocationUpdates();
-                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY,
-                                7000,
-                                5000);
+                        locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
                         Log.d("TAG", "ON_FOOT");
                         Toast.makeText(getBaseContext(), "ON_FOOT " +
                                 locationHelper.getRequest().getInterval() + " " +
@@ -141,9 +169,7 @@ public class MainActivity extends AppCompatActivity {
                         if (lastType == DetectedActivity.RUNNING) return;
                         lastType = DetectedActivity.RUNNING;
                         locationHelper.stopLocationUpdates();
-                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY,
-                                11000,
-                                10000);
+                        locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
                         Log.d("TAG", "RUNNING");
                         Toast.makeText(getBaseContext(), "RUNNING " +
                                 locationHelper.getRequest().getInterval() + " " +
@@ -155,9 +181,7 @@ public class MainActivity extends AppCompatActivity {
                         if (lastType == DetectedActivity.TILTING) return;
                         lastType = DetectedActivity.TILTING;
                         locationHelper.stopLocationUpdates();
-                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY,
-                                9000,
-                                7000);
+                        locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
                         Log.d("TAG", "TILTING");
                         Toast.makeText(getBaseContext(), "TILTING " +
                                 locationHelper.getRequest().getInterval() + " " +
@@ -169,9 +193,7 @@ public class MainActivity extends AppCompatActivity {
                         if (lastType == DetectedActivity.UNKNOWN) return;
                         lastType = DetectedActivity.UNKNOWN;
                         locationHelper.stopLocationUpdates();
-                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY,
-                                9000,
-                                7000);
+                        locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
                         Log.d("TAG", "UNKNOWN");
                         Toast.makeText(getBaseContext(), "UNKNOWN " +
                                 locationHelper.getRequest().getInterval() + " " +
@@ -232,8 +254,8 @@ public class MainActivity extends AppCompatActivity {
             finishMarker = googleMap.addMarker(new MarkerOptions()
                     .position(latLng)
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_pin))
-            .title("Do you want to get here?")
-            .snippet("Click on window to lay the route!"));
+            .title(getString(R.string.text_info_window_title))
+            .snippet(getString(R.string.text_info_window_message)));
             finishMarker.showInfoWindow();
         }
     };
@@ -242,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onInfoWindowClick(Marker marker) {
             if (!NetworkUtils.isInternetAvailable(getBaseContext())) {
-                Toast.makeText(getBaseContext(), "No internet connection", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -260,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
         public void success(DirectionResponse directionResponse, Response response) {
 
             if (directionResponse.polylineList == null) {
-                Toast.makeText(getBaseContext(), "No route found", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), getString(R.string.error_no_route), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -269,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             final PolylineOptions polylineOptions = new PolylineOptions()
-                    .width(15)
+                    .width(POLYLINE_WIDTH)
                     .color(ContextCompat.getColor(getBaseContext(), R.color.colorAccent))
                     .geodesic(true);
             for (LatLng latLng : directionResponse.polylineList) {

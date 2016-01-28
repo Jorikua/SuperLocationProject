@@ -7,5 +7,11 @@
     <string name="error_location_disconnected">Disconnected. Please re-connect.</string>
     <string name="error_location_network_lost">Network lost. Please re-connect.</string>
     <string name="error_services_not_available">Sorry. Location services not available to you</string>
+    <string name="error_no_internet">No internet connection</string>
+    <string name="error_no_route">No route found</string>
+    <string name="text_info_window_title">Do you want to get here?</string>
+    <string name="text_info_window_message">Click on window to lay the route!</string>
+    <string name="text_yes">OK</string>
+    <string name="text_permission_dialog_message">Your location won\'t show if you don\'t grant this permission</string>
 
 </resources>
