@@ -10,7 +10,7 @@ import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
 
 import ua.kaganovych.superlocationproject.api.response.DirectionResponse;
-import ua.kaganovych.superlocationproject.util.MapUitls;
+import ua.kaganovych.superlocationproject.util.MapUtils;
 
 public class DirectionParser implements JsonDeserializer<DirectionResponse> {
     @Override
@@ -22,7 +22,7 @@ public class DirectionParser implements JsonDeserializer<DirectionResponse> {
         for (int i = 0; i < routesArray.size(); i++) {
             final JsonElement jsonElement = routesArray.get(i);
             final JsonObject polylineObject = jsonElement.getAsJsonObject().getAsJsonObject("overview_polyline");
-            directionResponse.polylineList = MapUitls.decode(polylineObject.get("points").getAsString());
+            directionResponse.polylineList = MapUtils.decode(polylineObject.get("points").getAsString());
         }
 
         return directionResponse;

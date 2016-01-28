@@ -6,15 +6,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.DetectedActivity;
@@ -37,6 +41,7 @@ import ua.kaganovych.superlocationproject.R;
 import ua.kaganovych.superlocationproject.api.ApiHelper;
 import ua.kaganovych.superlocationproject.api.response.DirectionResponse;
 import ua.kaganovych.superlocationproject.model.Direction;
+import ua.kaganovych.superlocationproject.util.MapUtils;
 import ua.kaganovych.superlocationproject.util.NetworkUtils;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,9 +52,11 @@ public class MainActivity extends AppCompatActivity {
     private Marker finishMarker;
     private Marker myMarker;
     private Polyline polyline;
-    private int lastType;
     private static final int POLYLINE_WIDTH = 15;
     private static final int REQUEST_CODE_LOCATION_PERMISSION = 123;
+    private static final int REQUEST_CODE_GPS = 111;
+    private Snackbar snackbar;
+    private boolean enableAnimation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +78,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (!MapUtils.isGPSEnabled(this)) {
+            showSnackbar();
+            return;
+        }
+        checkForPermissions();
+    }
+
+    private void checkForPermissions() {
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             locationHelper.connectClient();
             return;
@@ -81,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             locationHelper.connectClient();
         }
-
     }
 
     @SuppressWarnings("all")
@@ -129,21 +143,17 @@ public class MainActivity extends AppCompatActivity {
             switch (type) {
                 case DetectedActivity.STILL:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
-                        if (lastType == DetectedActivity.STILL) return;
-                            lastType = DetectedActivity.STILL;
-                            locationHelper.stopLocationUpdates();
-                            locationHelper.createLocationRequestAndStart(DateUtils.MINUTE_IN_MILLIS, DateUtils.MINUTE_IN_MILLIS - 5000);
-                            Log.d("TAG", "STILL");
-                            Toast.makeText(getBaseContext(), "STILL " +
-                                    locationHelper.getRequest().getInterval() + " " +
-                                    locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
+                        locationHelper.stopLocationUpdates();
+                        locationHelper.createLocationRequestAndStart(DateUtils.MINUTE_IN_MILLIS, DateUtils.MINUTE_IN_MILLIS - 5000);
+                        Log.d("TAG", "STILL");
+                        Toast.makeText(getBaseContext(), "STILL " +
+                                locationHelper.getRequest().getInterval() + " " +
+                                locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
 
                     }
                     break;
                 case DetectedActivity.WALKING:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
-                        if (lastType == DetectedActivity.WALKING) return;
-                        lastType = DetectedActivity.WALKING;
                         locationHelper.stopLocationUpdates();
                         locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
                         Log.d("TAG", "WALKING");
@@ -154,8 +164,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case DetectedActivity.ON_FOOT:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
-                        if (lastType == DetectedActivity.ON_FOOT) return;
-                        lastType = DetectedActivity.ON_FOOT;
                         locationHelper.stopLocationUpdates();
                         locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
                         Log.d("TAG", "ON_FOOT");
@@ -166,8 +174,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case DetectedActivity.RUNNING:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
-                        if (lastType == DetectedActivity.RUNNING) return;
-                        lastType = DetectedActivity.RUNNING;
                         locationHelper.stopLocationUpdates();
                         locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
                         Log.d("TAG", "RUNNING");
@@ -178,8 +184,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case DetectedActivity.TILTING:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
-                        if (lastType == DetectedActivity.TILTING) return;
-                        lastType = DetectedActivity.TILTING;
                         locationHelper.stopLocationUpdates();
                         locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
                         Log.d("TAG", "TILTING");
@@ -190,8 +194,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case DetectedActivity.UNKNOWN:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
-                        if (lastType == DetectedActivity.UNKNOWN) return;
-                        lastType = DetectedActivity.UNKNOWN;
                         locationHelper.stopLocationUpdates();
                         locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
                         Log.d("TAG", "UNKNOWN");
@@ -228,7 +230,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onLocationChanged(Location location) {
             if (googleMap != null) {
-                addMarker(new LatLng(location.getLatitude(), location.getLongitude()), googleMap, false);
+                addMarker(new LatLng(location.getLatitude(), location.getLongitude()), googleMap, enableAnimation);
+                enableAnimation = false;
             }
         }
     };
@@ -303,6 +306,30 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void failure(RetrofitError error) {
 
+        }
+    };
+
+    private void showSnackbar() {
+        snackbar = Snackbar
+                .make(findViewById(android.R.id.content), getString(R.string.text_enable_gps), Snackbar.LENGTH_INDEFINITE)
+                .setAction(getString(R.string.text_click), snackBarListener);
+        snackbar.setActionTextColor(Color.RED);
+        final View snackbarView = snackbar.getView();
+        snackbarView.setBackgroundColor(Color.DKGRAY);
+        TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(Color.YELLOW);
+        snackbar.show();
+    }
+
+    private View.OnClickListener snackBarListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            enableAnimation = true;
+            if (snackbar != null) {
+                snackbar.dismiss();
+            }
+            final Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivityForResult(intent, REQUEST_CODE_GPS);
         }
     };
 }

@@ -1,11 +1,19 @@
 package ua.kaganovych.superlocationproject.util;
 
+import android.content.Context;
+import android.location.LocationManager;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapUitls {
+public class MapUtils {
+
+    public static boolean isGPSEnabled(Context context) {
+        final LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
 
     public static List<LatLng> decode(final String encodedPath) {
         int len = encodedPath.length();

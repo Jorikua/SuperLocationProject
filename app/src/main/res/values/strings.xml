@@ -13,5 +13,7 @@
     <string name="text_info_window_message">Click on window to lay the route!</string>
     <string name="text_yes">OK</string>
     <string name="text_permission_dialog_message">Your location won\'t show if you don\'t grant this permission</string>
-
+    <string name="text_enable_gps">Please, enable GPS on your device</string>
+    <string name="text_click">Click</string>
+    
 </resources>
