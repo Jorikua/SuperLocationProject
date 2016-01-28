@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.DetectedActivity;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -144,7 +145,8 @@ public class MainActivity extends AppCompatActivity {
                 case DetectedActivity.STILL:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
                         locationHelper.stopLocationUpdates();
-                        locationHelper.createLocationRequestAndStart(DateUtils.MINUTE_IN_MILLIS, DateUtils.MINUTE_IN_MILLIS - 5000);
+                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, DateUtils.MINUTE_IN_MILLIS, DateUtils.MINUTE_IN_MILLIS - 5000);
+                        //for debugging
                         Log.d("TAG", "STILL");
                         Toast.makeText(getBaseContext(), "STILL " +
                                 locationHelper.getRequest().getInterval() + " " +
@@ -155,7 +157,8 @@ public class MainActivity extends AppCompatActivity {
                 case DetectedActivity.WALKING:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
                         locationHelper.stopLocationUpdates();
-                        locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
+                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
+                        //for debugging
                         Log.d("TAG", "WALKING");
                         Toast.makeText(getBaseContext(), "WALKING " +
                                 locationHelper.getRequest().getInterval() + " " +
@@ -165,7 +168,8 @@ public class MainActivity extends AppCompatActivity {
                 case DetectedActivity.ON_FOOT:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
                         locationHelper.stopLocationUpdates();
-                        locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
+                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
+                        //for debugging
                         Log.d("TAG", "ON_FOOT");
                         Toast.makeText(getBaseContext(), "ON_FOOT " +
                                 locationHelper.getRequest().getInterval() + " " +
@@ -175,7 +179,8 @@ public class MainActivity extends AppCompatActivity {
                 case DetectedActivity.RUNNING:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
                         locationHelper.stopLocationUpdates();
-                        locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
+                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
+                        //for debugging
                         Log.d("TAG", "RUNNING");
                         Toast.makeText(getBaseContext(), "RUNNING " +
                                 locationHelper.getRequest().getInterval() + " " +
@@ -185,7 +190,8 @@ public class MainActivity extends AppCompatActivity {
                 case DetectedActivity.TILTING:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
                         locationHelper.stopLocationUpdates();
-                        locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
+                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
+                        //for debugging
                         Log.d("TAG", "TILTING");
                         Toast.makeText(getBaseContext(), "TILTING " +
                                 locationHelper.getRequest().getInterval() + " " +
@@ -195,7 +201,8 @@ public class MainActivity extends AppCompatActivity {
                 case DetectedActivity.UNKNOWN:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
                         locationHelper.stopLocationUpdates();
-                        locationHelper.createLocationRequestAndStart(Config.INTERVAL, Config.FASTEST_INTERVAL);
+                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
+                        //for debugging
                         Log.d("TAG", "UNKNOWN");
                         Toast.makeText(getBaseContext(), "UNKNOWN " +
                                 locationHelper.getRequest().getInterval() + " " +
@@ -221,18 +228,17 @@ public class MainActivity extends AppCompatActivity {
     private LocationHelper.LocationFoundCallback locationFoundCallback = new LocationHelper.LocationFoundCallback() {
         @Override
         public void onLocationFound(Location location) {
-            if (googleMap != null) {
-                addMarker(new LatLng(location.getLatitude(), location.getLongitude()), googleMap, true);
-                Log.d("TAG", locationHelper.getCurrentLocation().toString());
-            }
+            if (googleMap == null) return;
+            addMarker(new LatLng(location.getLatitude(), location.getLongitude()), googleMap, true);
+            Log.d("TAG", locationHelper.getCurrentLocation().toString());
+
         }
 
         @Override
         public void onLocationChanged(Location location) {
-            if (googleMap != null) {
-                addMarker(new LatLng(location.getLatitude(), location.getLongitude()), googleMap, enableAnimation);
-                enableAnimation = false;
-            }
+            if (googleMap == null) return;
+            addMarker(new LatLng(location.getLatitude(), location.getLongitude()), googleMap, enableAnimation);
+            enableAnimation = false;
         }
     };
 

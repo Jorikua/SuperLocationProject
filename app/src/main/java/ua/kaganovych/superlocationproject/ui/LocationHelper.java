@@ -148,9 +148,9 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
         return locationRequest;
     }
 
-    public void createLocationRequestAndStart(long interval, long fastestInterval) {
+    public void createLocationRequestAndStart(int priority, long interval, long fastestInterval) {
         locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setPriority(priority);
         locationRequest.setInterval(interval);
         locationRequest.setFastestInterval(fastestInterval);
         startLocationUpdates();
