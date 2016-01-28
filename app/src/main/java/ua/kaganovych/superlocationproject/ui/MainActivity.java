@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if (!MapUtils.isGPSEnabled(this)) {
-            showSnackbar();
+            showGPSSnackbar();
             return;
         }
         checkForPermissions();
@@ -309,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private void showSnackbar() {
+    private void showGPSSnackbar() {
         snackbar = Snackbar
                 .make(findViewById(android.R.id.content), getString(R.string.text_enable_gps), Snackbar.LENGTH_INDEFINITE)
                 .setAction(getString(R.string.text_click), snackBarListener);

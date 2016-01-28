@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
     private Location currentLocation;
     private LocationFoundCallback locationFoundCallback;
     private String statusMessage;
+    private String updateMessage;
 
     public LocationHelper(Context context, LocationFoundCallback locationFoundCallback) {
         this.context = context;
@@ -91,7 +93,7 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
 
 
     private void requestActivityUpdates() {
-        statusMessage = "Succeeded"; // For debugging
+        statusMessage = "Activity detection succeeded"; // For debugging
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(
                 googleApiClient,
                 UPDATE_INTERVAL,
@@ -99,7 +101,7 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
     }
 
     public void removeActivityUpdates() {
-        statusMessage = "Stopped"; // For debugging
+        statusMessage = "Activity detection stopped"; // For debugging
         ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(
                 googleApiClient,
                 getActivityDetectionPendingIntent()).setResultCallback(resultCallback);
@@ -132,7 +134,10 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
         @Override
         public void onResult(Status status) {
             if (status.isSuccess()) {
-                Log.d("TAG", "Activity detection " + statusMessage);
+                Log.d("TAG", statusMessage);
+                if (!TextUtils.isEmpty(updateMessage)) {
+                    Log.d("TAG", updateMessage);
+                }
                 return;
             }
             Log.d("TAG", "resultCallbackFailed");
@@ -153,12 +158,14 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
 
     @SuppressWarnings("all")
     public void startLocationUpdates() {
+        updateMessage = "Location updates started"; // for debugging
         LocationServices.FusedLocationApi.requestLocationUpdates(
-                googleApiClient, locationRequest, this);
+                googleApiClient, locationRequest, this).setResultCallback(resultCallback);
     }
 
     public void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+        updateMessage = "Location updates stopped"; // for debugging
+        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this).setResultCallback(resultCallback);
     }
 
     public GoogleApiClient getGoogleApiClient() {
