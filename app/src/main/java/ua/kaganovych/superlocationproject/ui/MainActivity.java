@@ -52,12 +52,16 @@ public class MainActivity extends AppCompatActivity {
     private GoogleMap googleMap;
     private Marker finishMarker;
     private Marker myMarker;
+    private LatLng finishLatLng;
+    private LatLng myLatLng;
     private Polyline polyline;
+    private PolylineOptions polylineOptions;
     private static final int POLYLINE_WIDTH = 15;
     private static final int REQUEST_CODE_LOCATION_PERMISSION = 123;
     private static final int REQUEST_CODE_GPS = 111;
     private Snackbar snackbar;
     private boolean enableAnimation;
+    private Bundle savedInstanceState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,14 +69,47 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         locationHelper = new LocationHelper(this, locationFoundCallback);
         setUpMapIfNeeded();
+        this.savedInstanceState = savedInstanceState;
     }
 
     private void setUpMapIfNeeded() {
         if (mapFragment == null) {
             mapFragment = ((MapFragment) getFragmentManager().findFragmentById(R.id.map));
+            mapFragment.setRetainInstance(true);
             if (mapFragment != null) {
                 mapFragment.getMapAsync(onMapReadyCallback);
             }
+        }
+    }
+
+    private void updateValuesFromBundle(Bundle bundle) {
+        if (bundle == null) return;
+        if (googleMap == null) return;
+        if (bundle.keySet().contains("polylineOptions")) {
+            polylineOptions = bundle.getParcelable("polylineOptions");
+            polyline = googleMap.addPolyline((PolylineOptions)bundle.getParcelable("polylineOptions"));
+        }
+        if (bundle.keySet().contains("finishLatLng")) {
+            finishLatLng = bundle.getParcelable("finishLatLng");
+            addFinishMarker(finishLatLng);
+        }
+        if (bundle.keySet().contains("myLatLng")) {
+            myLatLng = bundle.getParcelable("myLatLng");
+            addMarker(myLatLng, googleMap, false);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (polylineOptions != null) {
+            outState.putParcelable("polylineOptions", polylineOptions);
+        }
+        if (finishLatLng != null) {
+            outState.putParcelable("finishLatLng", finishLatLng);
+        }
+        if (myLatLng != null) {
+            outState.putParcelable("myLatLng", myLatLng);
         }
     }
 
@@ -213,8 +250,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onMapReady(GoogleMap googleMap) {
             MainActivity.this.googleMap = googleMap;
+            googleMap.clear();
             googleMap.setOnMapClickListener(onMapClickListener);
             googleMap.setOnInfoWindowClickListener(onInfoWindowClickListener);
+            updateValuesFromBundle(savedInstanceState);
             googleMap.getUiSettings().setMapToolbarEnabled(false);
         }
     };
@@ -223,7 +262,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onLocationFound(Location location) {
             if (googleMap == null) return;
-            addMarker(new LatLng(location.getLatitude(), location.getLongitude()), googleMap, true);
+            myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            addMarker(myLatLng, googleMap, true);
             Log.d("TAG", locationHelper.getCurrentLocation().toString());
 
         }
@@ -231,7 +271,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onLocationChanged(Location location) {
             if (googleMap == null) return;
-            addMarker(new LatLng(location.getLatitude(), location.getLongitude()), googleMap, enableAnimation);
+            myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            addMarker(myLatLng, googleMap, enableAnimation);
             enableAnimation = false;
         }
     };
@@ -251,17 +292,24 @@ public class MainActivity extends AppCompatActivity {
     private GoogleMap.OnMapClickListener onMapClickListener = new GoogleMap.OnMapClickListener() {
         @Override
         public void onMapClick(LatLng latLng) {
-            if (finishMarker != null) {
-                finishMarker.remove();
-            }
-            finishMarker = googleMap.addMarker(new MarkerOptions()
-                    .position(latLng)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_pin))
-            .title(getString(R.string.text_info_window_title))
-            .snippet(getString(R.string.text_info_window_message)));
-            finishMarker.showInfoWindow();
+            finishLatLng = latLng;
+            addFinishMarker(finishLatLng);
         }
     };
+
+    private void addFinishMarker(LatLng latLng) {
+        if (latLng == null) return;
+
+        if (finishMarker != null) {
+            finishMarker.remove();
+        }
+        finishMarker = googleMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_pin))
+                .title(getString(R.string.text_info_window_title))
+                .snippet(getString(R.string.text_info_window_message)));
+        finishMarker.showInfoWindow();
+    }
 
     private GoogleMap.OnInfoWindowClickListener onInfoWindowClickListener = new GoogleMap.OnInfoWindowClickListener() {
         @Override
@@ -293,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
                 polyline.remove();
             }
 
-            final PolylineOptions polylineOptions = new PolylineOptions()
+            polylineOptions = new PolylineOptions()
                     .width(POLYLINE_WIDTH)
                     .color(ContextCompat.getColor(getBaseContext(), R.color.colorAccent))
                     .geodesic(true);

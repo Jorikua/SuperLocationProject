@@ -19,7 +19,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import ua.kaganovych.superlocationproject.R;
-import ua.kaganovych.superlocationproject.service.LocationUpdateService;
+import ua.kaganovych.superlocationproject.service.ActivityDetectionService;
 
 public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -108,7 +108,7 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
     }
 
     private PendingIntent getActivityDetectionPendingIntent() {
-        final Intent intent = new Intent(context, LocationUpdateService.class);
+        final Intent intent = new Intent(context, ActivityDetectionService.class);
         return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 

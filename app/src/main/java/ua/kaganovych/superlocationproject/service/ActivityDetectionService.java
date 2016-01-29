@@ -10,12 +10,12 @@ import com.google.android.gms.location.DetectedActivity;
 
 import ua.kaganovych.superlocationproject.Config;
 
-public class LocationUpdateService extends IntentService {
+public class ActivityDetectionService extends IntentService {
 
     private static int type = -1;
 
-    public LocationUpdateService() {
-        super(LocationUpdateService.class.getSimpleName());
+    public ActivityDetectionService() {
+        super(ActivityDetectionService.class.getSimpleName());
     }
 
     @Override
@@ -28,30 +28,24 @@ public class LocationUpdateService extends IntentService {
             if (mostProbableType == type) {
                 return;
             }
-
+            type = mostProbableType;
             switch (mostProbableType) {
                 case DetectedActivity.STILL:
-                    type = DetectedActivity.STILL;
                     sendData(DetectedActivity.STILL);
                     break;
                 case DetectedActivity.WALKING:
-                    type = DetectedActivity.WALKING;
                     sendData(DetectedActivity.WALKING);
                     break;
                 case DetectedActivity.ON_FOOT:
-                    type = DetectedActivity.ON_FOOT;
                     sendData(DetectedActivity.ON_FOOT);
                     break;
                 case DetectedActivity.RUNNING:
-                    type = DetectedActivity.RUNNING;
                     sendData(DetectedActivity.RUNNING);
                     break;
                 case DetectedActivity.TILTING:
-                    type = DetectedActivity.TILTING;
                     sendData(DetectedActivity.TILTING);
                     break;
                 default:
-                    type = DetectedActivity.UNKNOWN;
                     sendData(DetectedActivity.UNKNOWN);
                     break;
             }
