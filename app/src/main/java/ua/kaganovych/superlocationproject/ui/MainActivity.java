@@ -144,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
             switch (type) {
                 case DetectedActivity.STILL:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
-                        locationHelper.stopLocationUpdates();
                         locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, DateUtils.MINUTE_IN_MILLIS, DateUtils.MINUTE_IN_MILLIS - 5000);
                         //for debugging
                         Log.d("TAG", "STILL");
@@ -156,7 +155,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case DetectedActivity.WALKING:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
-                        locationHelper.stopLocationUpdates();
                         locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
                         //for debugging
                         Log.d("TAG", "WALKING");
@@ -167,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case DetectedActivity.ON_FOOT:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
-                        locationHelper.stopLocationUpdates();
                         locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
                         //for debugging
                         Log.d("TAG", "ON_FOOT");
@@ -178,7 +175,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case DetectedActivity.RUNNING:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
-                        locationHelper.stopLocationUpdates();
                         locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
                         //for debugging
                         Log.d("TAG", "RUNNING");
@@ -189,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case DetectedActivity.TILTING:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
-                        locationHelper.stopLocationUpdates();
                         locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
                         //for debugging
                         Log.d("TAG", "TILTING");
@@ -200,7 +195,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case DetectedActivity.UNKNOWN:
                     if (locationHelper.getGoogleApiClient().isConnected()) {
-                        locationHelper.stopLocationUpdates();
                         locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
                         //for debugging
                         Log.d("TAG", "UNKNOWN");

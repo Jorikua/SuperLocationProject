@@ -129,6 +129,9 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
         void onLocationChanged(Location location);
     }
 
+    /**
+    Debugging
+     */
     @SuppressWarnings("all")
     private ResultCallback<Status> resultCallback = new ResultCallback<Status>() {
         @Override
@@ -149,7 +152,9 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
     }
 
     public void createLocationRequestAndStart(int priority, long interval, long fastestInterval) {
-        locationRequest = LocationRequest.create();
+        if (locationRequest == null) {
+            locationRequest = LocationRequest.create();
+        }
         locationRequest.setPriority(priority);
         locationRequest.setInterval(interval);
         locationRequest.setFastestInterval(fastestInterval);

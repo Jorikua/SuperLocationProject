@@ -3,6 +3,7 @@ package ua.kaganovych.superlocationproject.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
@@ -25,7 +26,6 @@ public class LocationUpdateService extends IntentService {
             final int mostProbableType = detectedActivity.getType();
 
             if (mostProbableType == type) {
-                stopSelf(); 
                 return;
             }
 
@@ -62,6 +62,11 @@ public class LocationUpdateService extends IntentService {
         final Intent intent = new Intent(Config.ACTIVITY_TYPE_ACTION);
         intent.putExtra("type", type);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        stopSelf();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("TAG", "Service destroyed"); //for debugging
     }
 }
