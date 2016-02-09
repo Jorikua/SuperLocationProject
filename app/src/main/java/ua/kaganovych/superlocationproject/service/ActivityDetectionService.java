@@ -31,19 +31,19 @@ public class ActivityDetectionService extends IntentService {
             type = mostProbableType;
             switch (mostProbableType) {
                 case DetectedActivity.STILL:
-                    sendData(DetectedActivity.STILL);
+                    sendData(mostProbableType);
                     break;
                 case DetectedActivity.WALKING:
-                    sendData(DetectedActivity.WALKING);
+                    sendData(mostProbableType);
                     break;
                 case DetectedActivity.ON_FOOT:
-                    sendData(DetectedActivity.ON_FOOT);
+                    sendData(mostProbableType);
                     break;
                 case DetectedActivity.RUNNING:
-                    sendData(DetectedActivity.RUNNING);
+                    sendData(mostProbableType);
                     break;
                 case DetectedActivity.TILTING:
-                    sendData(DetectedActivity.TILTING);
+                    sendData(mostProbableType);
                     break;
                 default:
                     sendData(DetectedActivity.UNKNOWN);

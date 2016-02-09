@@ -173,12 +173,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(updateLocationReceiver, new IntentFilter(Config.ACTIVITY_TYPE_ACTION));
+        LocalBroadcastManager.getInstance(this).registerReceiver(lowBatteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_LOW));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(updateLocationReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(lowBatteryReceiver);
         if (locationHelper == null) return;
         if (locationHelper.getGoogleApiClient().isConnected()) {
             locationHelper.stopLocationUpdates();
@@ -260,6 +262,26 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 default:
                     break;
+            }
+        }
+    };
+
+    private BroadcastReceiver lowBatteryReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final LowBatteryDialog lowBatteryDialog = new LowBatteryDialog();
+            lowBatteryDialog.show(getFragmentManager(), "LowBatteryDialog");
+            lowBatteryDialog.setTurnOffLocationCallback(turnOffLocationCallback);
+        }
+    };
+
+    private LowBatteryDialog.TurnOffLocationCallback turnOffLocationCallback = new LowBatteryDialog.TurnOffLocationCallback() {
+        @Override
+        public void onTurnOffLocation() {
+            if (locationHelper == null) return;
+            if (locationHelper.getGoogleApiClient().isConnected()) {
+                locationHelper.stopLocationUpdates();
+                locationHelper.removeActivityUpdates();
             }
         }
     };
