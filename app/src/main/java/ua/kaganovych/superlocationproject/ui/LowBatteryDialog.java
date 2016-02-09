@@ -6,6 +6,8 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
+import ua.kaganovych.superlocationproject.R;
+
 public class LowBatteryDialog extends DialogFragment {
 
     private TurnOffLocationCallback turnOffLocationCallback;
@@ -15,9 +17,9 @@ public class LowBatteryDialog extends DialogFragment {
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        builder.setMessage("Attention, low battery level!")
-                .setPositiveButton("Turn off all location updates", turnOffListener)
-                .setNegativeButton("Dismiss", closeListener);
+        builder.setMessage(R.string.text_low_battery_dialog_message)
+                .setPositiveButton(R.string.text_low_battery_dialog_turn_off_btn, turnOffListener)
+                .setNegativeButton(R.string.text_dismiss, closeListener);
 
         return builder.create();
     }

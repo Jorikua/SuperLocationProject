@@ -181,11 +181,7 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(updateLocationReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(lowBatteryReceiver);
-        if (locationHelper == null) return;
-        if (locationHelper.getGoogleApiClient().isConnected()) {
-            locationHelper.stopLocationUpdates();
-            locationHelper.removeActivityUpdates();
-        }
+        stopUpdates();
     }
 
     @Override
@@ -198,67 +194,56 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver updateLocationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (!locationHelper.getGoogleApiClient().isConnected()) return;
             final int type = intent.getIntExtra("type", DetectedActivity.UNKNOWN);
             switch (type) {
                 case DetectedActivity.STILL:
-                    if (locationHelper.getGoogleApiClient().isConnected()) {
-                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, DateUtils.MINUTE_IN_MILLIS, DateUtils.MINUTE_IN_MILLIS - 5000);
-                        //for debugging
-                        Log.d("TAG", "STILL");
-                        Toast.makeText(getBaseContext(), "STILL " +
-                                locationHelper.getRequest().getInterval() + " " +
-                                locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
-                    }
+                    locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, DateUtils.MINUTE_IN_MILLIS, DateUtils.MINUTE_IN_MILLIS - 5000);
+                    //for debugging
+                    Log.d("TAG", "STILL");
+                    Toast.makeText(getBaseContext(), "STILL " +
+                            locationHelper.getRequest().getInterval() + " " +
+                            locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
                     break;
                 case DetectedActivity.WALKING:
-                    if (locationHelper.getGoogleApiClient().isConnected()) {
-                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
-                        //for debugging
-                        Log.d("TAG", "WALKING");
-                        Toast.makeText(getBaseContext(), "WALKING " +
-                                locationHelper.getRequest().getInterval() + " " +
-                                locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
-                    }
+                    locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
+                    //for debugging
+                    Log.d("TAG", "WALKING");
+                    Toast.makeText(getBaseContext(), "WALKING " +
+                            locationHelper.getRequest().getInterval() + " " +
+                            locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
                     break;
                 case DetectedActivity.ON_FOOT:
-                    if (locationHelper.getGoogleApiClient().isConnected()) {
-                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
-                        //for debugging
-                        Log.d("TAG", "ON_FOOT");
-                        Toast.makeText(getBaseContext(), "ON_FOOT " +
-                                locationHelper.getRequest().getInterval() + " " +
-                                locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
-                    }
+                    locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
+                    //for debugging
+                    Log.d("TAG", "ON_FOOT");
+                    Toast.makeText(getBaseContext(), "ON_FOOT " +
+                            locationHelper.getRequest().getInterval() + " " +
+                            locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
                     break;
                 case DetectedActivity.RUNNING:
-                    if (locationHelper.getGoogleApiClient().isConnected()) {
-                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
-                        //for debugging
-                        Log.d("TAG", "RUNNING");
-                        Toast.makeText(getBaseContext(), "RUNNING " +
-                                locationHelper.getRequest().getInterval() + " " +
-                                locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
-                    }
+                    locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
+                    //for debugging
+                    Log.d("TAG", "RUNNING");
+                    Toast.makeText(getBaseContext(), "RUNNING " +
+                            locationHelper.getRequest().getInterval() + " " +
+                            locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
                     break;
                 case DetectedActivity.TILTING:
-                    if (locationHelper.getGoogleApiClient().isConnected()) {
-                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
-                        //for debugging
-                        Log.d("TAG", "TILTING");
-                        Toast.makeText(getBaseContext(), "TILTING " +
-                                locationHelper.getRequest().getInterval() + " " +
-                                locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
-                    }
+                    locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
+                    //for debugging
+                    Log.d("TAG", "TILTING");
+                    Toast.makeText(getBaseContext(), "TILTING " +
+                            locationHelper.getRequest().getInterval() + " " +
+                            locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
                     break;
                 case DetectedActivity.UNKNOWN:
-                    if (locationHelper.getGoogleApiClient().isConnected()) {
-                        locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
-                        //for debugging
-                        Log.d("TAG", "UNKNOWN");
-                        Toast.makeText(getBaseContext(), "UNKNOWN " +
-                                locationHelper.getRequest().getInterval() + " " +
-                                locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
-                    }
+                    locationHelper.createLocationRequestAndStart(LocationRequest.PRIORITY_HIGH_ACCURACY, Config.INTERVAL, Config.FASTEST_INTERVAL);
+                    //for debugging
+                    Log.d("TAG", "UNKNOWN");
+                    Toast.makeText(getBaseContext(), "UNKNOWN " +
+                            locationHelper.getRequest().getInterval() + " " +
+                            locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
@@ -278,13 +263,17 @@ public class MainActivity extends AppCompatActivity {
     private LowBatteryDialog.TurnOffLocationCallback turnOffLocationCallback = new LowBatteryDialog.TurnOffLocationCallback() {
         @Override
         public void onTurnOffLocation() {
-            if (locationHelper == null) return;
-            if (locationHelper.getGoogleApiClient().isConnected()) {
-                locationHelper.stopLocationUpdates();
-                locationHelper.removeActivityUpdates();
-            }
+            stopUpdates();
         }
     };
+
+    private void stopUpdates() {
+        if (locationHelper == null) return;
+        if (locationHelper.getGoogleApiClient().isConnected()) {
+            locationHelper.stopLocationUpdates();
+            locationHelper.removeActivityUpdates();
+        }
+    }
 
     private OnMapReadyCallback onMapReadyCallback = new OnMapReadyCallback() {
         @Override

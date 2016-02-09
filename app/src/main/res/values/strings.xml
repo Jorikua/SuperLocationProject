@@ -15,5 +15,8 @@
     <string name="text_permission_dialog_message">Your location won\'t show if you don\'t grant this permission</string>
     <string name="text_enable_gps">Please, enable GPS on your device</string>
     <string name="text_click">Click</string>
-    
+    <string name="text_low_battery_dialog_message">Attention, low battery level!</string>
+    <string name="text_low_battery_dialog_turn_off_btn">Turn off all location updates</string>
+    <string name="text_dismiss">Dismiss</string>
+
 </resources>
