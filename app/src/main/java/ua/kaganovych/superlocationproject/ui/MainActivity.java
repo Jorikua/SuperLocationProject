@@ -67,6 +67,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (!NetworkUtils.isInternetAvailable(this)) {
+            Toast.makeText(getBaseContext(), getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!MapUtils.isGPSEnabled(this)) {
+            showGPSSnackbar();
+            return;
+        }
         locationHelper = new LocationHelper(this, locationFoundCallback);
         setUpMapIfNeeded();
         this.savedInstanceState = savedInstanceState;
@@ -87,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         if (googleMap == null) return;
         if (bundle.keySet().contains("polylineOptions")) {
             polylineOptions = bundle.getParcelable("polylineOptions");
-            polyline = googleMap.addPolyline((PolylineOptions)bundle.getParcelable("polylineOptions"));
+            polyline = googleMap.addPolyline((PolylineOptions) bundle.getParcelable("polylineOptions"));
         }
         if (bundle.keySet().contains("finishLatLng")) {
             finishLatLng = bundle.getParcelable("finishLatLng");
@@ -116,9 +124,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (!NetworkUtils.isInternetAvailable(this)) {
+            Toast.makeText(getBaseContext(), getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (!MapUtils.isGPSEnabled(this)) {
             showGPSSnackbar();
             return;
+        }
+        if (locationHelper == null) {
+            locationHelper = new LocationHelper(this, locationFoundCallback);
+            setUpMapIfNeeded();
         }
         checkForPermissions();
     }
@@ -130,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         }
         final int hasLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if (hasLocationPermission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_LOCATION_PERMISSION);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_LOCATION_PERMISSION);
         } else {
             locationHelper.connectClient();
         }
@@ -144,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     locationHelper.connectClient();
                 }
-                if (grantResults.length > 0 &&grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
                     final NoPermissionDialog noPermissionDialog = new NoPermissionDialog();
                     noPermissionDialog.show(getFragmentManager(), "NoPermissionDialog");
                 }
@@ -162,6 +179,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(updateLocationReceiver);
+        if (locationHelper == null) return;
         if (locationHelper.getGoogleApiClient().isConnected()) {
             locationHelper.stopLocationUpdates();
             locationHelper.removeActivityUpdates();
@@ -171,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        if (locationHelper == null) return;
         locationHelper.disconnectClient();
     }
 
@@ -187,7 +206,6 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(getBaseContext(), "STILL " +
                                 locationHelper.getRequest().getInterval() + " " +
                                 locationHelper.getRequest().getFastestInterval(), Toast.LENGTH_SHORT).show();
-
                     }
                     break;
                 case DetectedActivity.WALKING:

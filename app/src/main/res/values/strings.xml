@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SuperLocationProject</string>
-    <string name="google_map_api_key">AIzaSyCbZSlKiIIqX-qPhgXj_JS0k4aZrvK-MDc</string>
-    <string name="direction_api_key">AIzaSyAsvw2TJzOnIpg8pbeg531VVzl3u31uF7Y</string>
+    <string name="google_map_api_key">AIzaSyCKpoNfSawMsQ8uw6Oq04bJJDGDu8qbtFY</string>
+    <string name="direction_api_key">AIzaSyA99PcheZTQ96mNTwUBlnceVkMGbf_VaOs</string>
 
     <!--LocationHelper-->
     <string name="error_location_disconnected">Disconnected. Please re-connect.</string>
