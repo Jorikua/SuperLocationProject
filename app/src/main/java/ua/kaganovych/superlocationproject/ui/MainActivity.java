@@ -148,9 +148,9 @@ public class MainActivity extends AppCompatActivity {
         final int hasLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if (hasLocationPermission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_LOCATION_PERMISSION);
-        } else {
-            locationHelper.connectClient();
+            return;
         }
+        locationHelper.connectClient();
     }
 
     @SuppressWarnings("all")
