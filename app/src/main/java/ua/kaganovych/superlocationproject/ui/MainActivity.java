@@ -67,17 +67,73 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (!NetworkUtils.isInternetAvailable(this)) {
-            Toast.makeText(getBaseContext(), getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!MapUtils.isGPSEnabled(this)) {
-            showGPSSnackbar();
-            return;
-        }
+
+        if (!isServicesChecked()) return;
+
         locationHelper = new LocationHelper(this, locationFoundCallback);
         setUpMapIfNeeded();
         this.savedInstanceState = savedInstanceState;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!isServicesChecked()) return;
+
+        if (locationHelper == null) {
+            locationHelper = new LocationHelper(this, locationFoundCallback);
+            setUpMapIfNeeded();
+        }
+        checkForPermissions();
+    }
+
+    private boolean isServicesChecked() {
+        if (!NetworkUtils.isInternetAvailable(this)) {
+            Toast.makeText(getBaseContext(), getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (!MapUtils.isGPSEnabled(this)) {
+            showGPSSnackbar();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(updateLocationReceiver, new IntentFilter(Config.ACTIVITY_TYPE_ACTION));
+        LocalBroadcastManager.getInstance(this).registerReceiver(lowBatteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_LOW));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(updateLocationReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(lowBatteryReceiver);
+        stopUpdates();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (locationHelper == null) return;
+        locationHelper.disconnectClient();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (polylineOptions != null) {
+            outState.putParcelable("polylineOptions", polylineOptions);
+        }
+        if (finishLatLng != null) {
+            outState.putParcelable("finishLatLng", finishLatLng);
+        }
+        if (myLatLng != null) {
+            outState.putParcelable("myLatLng", myLatLng);
+        }
     }
 
     private void setUpMapIfNeeded() {
@@ -107,39 +163,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (polylineOptions != null) {
-            outState.putParcelable("polylineOptions", polylineOptions);
-        }
-        if (finishLatLng != null) {
-            outState.putParcelable("finishLatLng", finishLatLng);
-        }
-        if (myLatLng != null) {
-            outState.putParcelable("myLatLng", myLatLng);
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (!NetworkUtils.isInternetAvailable(this)) {
-            Toast.makeText(getBaseContext(), getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!MapUtils.isGPSEnabled(this)) {
-            showGPSSnackbar();
-            return;
-        }
-        if (locationHelper == null) {
-            locationHelper = new LocationHelper(this, locationFoundCallback);
-            setUpMapIfNeeded();
-        }
-        checkForPermissions();
-    }
-
     private void checkForPermissions() {
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             locationHelper.connectClient();
@@ -167,28 +190,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(updateLocationReceiver, new IntentFilter(Config.ACTIVITY_TYPE_ACTION));
-        LocalBroadcastManager.getInstance(this).registerReceiver(lowBatteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_LOW));
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(updateLocationReceiver);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(lowBatteryReceiver);
-        stopUpdates();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (locationHelper == null) return;
-        locationHelper.disconnectClient();
     }
 
     private BroadcastReceiver updateLocationReceiver = new BroadcastReceiver() {

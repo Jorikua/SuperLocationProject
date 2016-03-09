@@ -90,8 +90,6 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
         Toast.makeText(context, context.getString(R.string.error_services_not_available), Toast.LENGTH_LONG).show();
     }
 
-
-
     private void requestActivityUpdates() {
         statusMessage = "Activity detection succeeded"; // For debugging
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(
