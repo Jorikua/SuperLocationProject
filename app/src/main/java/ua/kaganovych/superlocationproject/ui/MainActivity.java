@@ -69,9 +69,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         if (!isServicesChecked()) return;
+        setupHelperAndMap();
 
-        locationHelper = new LocationHelper(this, locationFoundCallback);
-        setUpMapIfNeeded();
         this.savedInstanceState = savedInstanceState;
     }
 
@@ -81,10 +80,15 @@ public class MainActivity extends AppCompatActivity {
         if (!isServicesChecked()) return;
 
         if (locationHelper == null) {
-            locationHelper = new LocationHelper(this, locationFoundCallback);
-            setUpMapIfNeeded();
+            setupHelperAndMap();
         }
+
         checkForPermissions();
+    }
+
+    private void setupHelperAndMap() {
+        locationHelper = new LocationHelper(this, locationFoundCallback);
+        setUpMapIfNeeded();
     }
 
     private boolean isServicesChecked() {
